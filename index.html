@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NBA Imposter Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+            background-color: #1976d2;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #145ea8;
+        }
+
+        #card {
+            background: #222;
+            padding: 30px;
+            border-radius: 10px;
+            font-size: 28px;
+            text-align: center;
+            width: 80%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1>NBA Imposter Game</h1>
+        <label for="playerCount">How many people are playing?</label><br>
+        <input type="number" id="playerCount" min="3" max="20" style="padding:10px; font-size:18px; margin-top:10px;">
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="turn-screen" class="hidden">
+        <h1 id="turnTitle"></h1>
+        <button onclick="showCard()">Reveal</button>
+    </div>
+
+    <div id="card-screen" class="hidden">
+        <div id="card"></div>
+        <button onclick="nextTurn()">Next Player</button>
+    </div>
+
+    <div id="end-screen" class="hidden">
+        <h1>Everyone has seen their role!</h1>
+        <p>The game can begin — try to find the imposter!</p>
+    </div>
+
+    <script>
+        let players = [];
+        let chosenPlayer = "";
+        let numberOfPlayers = 0;
+        let currentTurn = 1;
+        let imposterIndex = 0;
+
+        async function startGame() {
+            numberOfPlayers = parseInt(document.getElementById("playerCount").value);
+            if (!numberOfPlayers || numberOfPlayers < 3) {
+                alert("Please enter at least 3 players.");
+                return;
+            }
+
+            // Load JSON file
+            const response = await fetch("players.json");
+            const data = await response.json();
+
+            // Flatten to a single list of player names
+            players = Object.values(data).flat();
+
+            // Pick a random NBA player
+            chosenPlayer = players[Math.floor(Math.random() * players.length)];
+
+            // Choose the imposter (random player index)
+            imposterIndex = Math.floor(Math.random() * numberOfPlayers) + 1;
+
+            // Switch screen
+            document.getElementById("start-screen").classList.add("hidden");
+            document.getElementById("turn-screen").classList.remove("hidden");
+
+            updateTurnTitle();
+        }
+
+        function updateTurnTitle() {
+            document.getElementById("turnTitle").textContent = `Player ${currentTurn}, your turn`;
+        }
+
+        function showCard() {
+            document.getElementById("turn-screen").classList.add("hidden");
+            document.getElementById("card-screen").classList.remove("hidden");
+
+            if (currentTurn === imposterIndex) {
+                document.getElementById("card").textContent = "❌ You are the IMPOSTER!";
+            } else {
+                document.getElementById("card").textContent = `✔️ The NBA player is:\n${chosenPlayer}`;
+            }
+        }
+
+        function nextTurn() {
+            document.getElementById("card-screen").classList.add("hidden");
+
+            currentTurn++;
+
+            if (currentTurn > numberOfPlayers) {
+                document.getElementById("end-screen").classList.remove("hidden");
+                return;
+            }
+
+            document.getElementById("turn-screen").classList.remove("hidden");
+            updateTurnTitle();
+        }
+    </script>
+
+</body>
+</html>
