@@ -158,7 +158,8 @@ function startGame() {
 function updateTurnTitle() { document.getElementById("turnTitle").textContent = `Player ${currentTurn}, your turn`; }
 
 function showCard() {
-  document.getElementById("card").textContent = (currentTurn === imposterIndex) ? "❌ You are the IMPOSTER!" : `✔️ The choice is:\n${chosenItem}`;
+  document.getElementById("card").textContent = 
+      (currentTurn === imposterIndex) ? "❌ You are the IMPOSTER!" : chosenItem;
   showScreen("card-screen");
 }
 
