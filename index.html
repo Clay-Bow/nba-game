@@ -1,115 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8" />
 <title>NBA Imposter Game</title>
 <style>
-body { font-family: Arial, sans-serif; background: #111; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-.hidden { display: none; }
-button { padding: 12px 20px; font-size: 18px; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; background-color: #1976d2; color: white; }
-button:hover { background-color: #145ea8; }
-#card { background: #222; padding: 30px; border-radius: 10px; font-size: 28px; text-align: center; width: 80%; max-width: 400px; }
-select, input { padding: 10px; font-size: 18px; margin-top: 10px; }
+  body { font-family: Arial, sans-serif; background: #111; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+  .hidden { display: none; }
+  button { padding: 12px 20px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; margin-top: 16px; background-color: #1976d2; color: white; }
+  button:hover { background-color: #145ea8; }
+  #card { background: #222; padding: 28px; border-radius: 12px; font-size: 22px; text-align: center; width: 100%; max-width: 520px; white-space: pre-wrap; }
+  select, input { padding: 10px; font-size: 16px; margin-top: 10px; border-radius: 6px; border: 1px solid #333; background: #0f0f0f; color: #fff; }
+  label { margin-top: 12px; display: block; }
+  h1 { margin: 0 0 12px 0; font-size: 28px; }
+  p { margin: 8px 0 0 0; color: #ddd; }
+  .small { font-size: 14px; color: #bbb; margin-top: 8px; }
 </style>
 </head>
 <body>
 
-<div id="start-screen">
+  <div id="start-screen">
     <h1>NBA Imposter Game</h1>
-    <label for="category">Choose a category:</label><br>
+
+    <label for="category">Choose a category:</label>
     <select id="category">
-        <option value="players">NBA Players</option>
-        <option value="teams">NBA Teams</option>
-        <option value="both">Both</option>
-    </select><br>
+      <option value="players">NBA Players</option>
+      <option value="teams">NBA Teams</option>
+      <option value="both">Both</option>
+    </select>
 
-    <label for="playerCount">How many people are playing?</label><br>
-    <input type="number" id="playerCount" min="3" max="20"><br>
+    <label for="playerCount">How many people are playing?</label>
+    <input type="number" id="playerCount" min="3" max="30" placeholder="Enter number of players">
 
-    <button onclick="startGame()">Start Game</button>
-</div>
+    <div>
+      <button onclick="startGame()">Start Game</button>
+    </div>
 
-<div id="turn-screen" class="hidden">
+    <p class="small">Tip: pass the phone around — each person presses <em>Reveal</em> on their turn so others can't see.</p>
+  </div>
+
+  <div id="turn-screen" class="hidden">
     <h1 id="turnTitle"></h1>
     <button onclick="showCard()">Reveal</button>
-</div>
+  </div>
 
-<div id="card-screen" class="hidden">
+  <div id="card-screen" class="hidden">
     <div id="card"></div>
     <button onclick="nextTurn()">Next Player</button>
-</div>
+  </div>
 
-<div id="end-screen" class="hidden">
+  <div id="end-screen" class="hidden">
     <h1>Everyone has seen their role!</h1>
     <p>The game can begin — try to find the imposter!</p>
-</div>
+    <button onclick="resetGame()">Play Again</button>
+  </div>
 
 <script>
-let teams = [];
-let players = [];
+// Embedded data (teams unchanged; players updated to be more current/pop-star heavy)
+const data = {
+  teams: [
+    "Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets",
+    "Chicago Bulls","Cleveland Cavaliers","Dallas Mavericks","Denver Nuggets",
+    "Detroit Pistons","Golden State Warriors","Houston Rockets","Indiana Pacers",
+    "Los Angeles Clippers","Los Angeles Lakers","Memphis Grizzlies","Miami Heat",
+    "Milwaukee Bucks","Minnesota Timberwolves","New Orleans Pelicans","New York Knicks",
+    "Oklahoma City Thunder","Orlando Magic","Philadelphia 76ers","Phoenix Suns",
+    "Portland Trail Blazers","Sacramento Kings","San Antonio Spurs","Toronto Raptors",
+    "Utah Jazz","Washington Wizards"
+  ],
+  players: [
+    "LeBron James",
+    "Giannis Antetokounmpo",
+    "Nikola Jokić",
+    "Luka Dončić",
+    "Jayson Tatum",
+    "Kevin Durant",
+    "Stephen Curry",
+    "Joel Embiid",
+    "Kawhi Leonard",
+    "Anthony Davis",
+    "Devin Booker",
+    "Trae Young",
+    "Ja Morant",
+    "Shai Gilgeous-Alexander",
+    "Anthony Edwards",
+    "Zion Williamson",
+    "Donovan Mitchell",
+    "Karl-Anthony Towns",
+    "Jimmy Butler",
+    "Paul George",
+    "Bam Adebayo",
+    "Damian Lillard",
+    "Kyrie Irving",
+    "Brandon Ingram",
+    "Pascal Siakam",
+    "Rudy Gobert",
+    "Victor Wembanyama",
+    "Jalen Brunson",
+    "Tyrese Haliburton",
+    "Lauri Markkanen",
+    "Julius Randle",
+    "De'Aaron Fox",
+    "Jaylen Brown",
+    "Kristaps Porziņģis",
+    "Chet Holmgren",
+    "LaMelo Ball",
+    "Darius Garland",
+    "Dejounte Murray",
+    "Zach LaVine",
+    "James Harden",
+    "Klay Thompson",
+    "Draymond Green",
+    "Mikal Bridges",
+    "Evan Mobley",
+    "Scottie Barnes",
+    "Paolo Banchero",
+    "Alperen Şengün",
+    "OG Anunoby",
+    "Tyrese Maxey"
+  ]
+};
+
+let teams = data.teams;
+let players = data.players;
+
 let chosenItem = "";
 let numberOfPlayers = 0;
 let currentTurn = 1;
 let imposterIndex = 0;
 
-async function startGame() {
-    numberOfPlayers = parseInt(document.getElementById("playerCount").value);
-    if (!numberOfPlayers || numberOfPlayers < 3) {
-        alert("Please enter at least 3 players.");
-        return;
-    }
+function startGame() {
+  // reset in case of replay
+  document.getElementById("end-screen").classList.add("hidden");
+  document.getElementById("card-screen").classList.add("hidden");
 
-    const category = document.getElementById("category").value;
+  numberOfPlayers = parseInt(document.getElementById("playerCount").value, 10);
+  if (!numberOfPlayers || numberOfPlayers < 3) {
+    alert("Please enter at least 3 players.");
+    return;
+  }
 
-    // Load JSON
-    const response = await fetch("./players.json");
-    const data = await response.json();
+  const category = document.getElementById("category").value;
+  let pool = [];
+  if (category === "players") pool = players.slice();
+  else if (category === "teams") pool = teams.slice();
+  else pool = players.concat(teams);
 
-    teams = data.teams;
-    players = data.players;
+  // pick random item for the round (same for all non-imposters)
+  chosenItem = pool[Math.floor(Math.random() * pool.length)];
 
-    let pool = [];
-    if (category === "players") pool = players;
-    else if (category === "teams") pool = teams;
-    else pool = players.concat(teams);
+  // pick random imposter index (1-based for readability)
+  imposterIndex = Math.floor(Math.random() * numberOfPlayers) + 1;
 
-    // Pick random item
-    chosenItem = pool[Math.floor(Math.random() * pool.length)];
+  currentTurn = 1;
 
-    // Pick random imposter
-    imposterIndex = Math.floor(Math.random() * numberOfPlayers) + 1;
-
-    document.getElementById("start-screen").classList.add("hidden");
-    document.getElementById("turn-screen").classList.remove("hidden");
-    updateTurnTitle();
+  document.getElementById("start-screen").classList.add("hidden");
+  document.getElementById("turn-screen").classList.remove("hidden");
+  updateTurnTitle();
 }
 
 function updateTurnTitle() {
-    document.getElementById("turnTitle").textContent = `Player ${currentTurn}, your turn`;
+  document.getElementById("turnTitle").textContent = `Player ${currentTurn}, your turn`;
 }
 
 function showCard() {
-    document.getElementById("turn-screen").classList.add("hidden");
-    document.getElementById("card-screen").classList.remove("hidden");
+  document.getElementById("turn-screen").classList.add("hidden");
+  document.getElementById("card-screen").classList.remove("hidden");
 
-    if (currentTurn === imposterIndex) {
-        document.getElementById("card").textContent = "❌ You are the IMPOSTER!";
-    } else {
-        document.getElementById("card").textContent = `✔️ The choice is:\n${chosenItem}`;
-    }
+  if (currentTurn === imposterIndex) {
+    document.getElementById("card").textContent = "❌ You are the IMPOSTER!";
+  } else {
+    document.getElementById("card").textContent = `✔️ The choice is:\n${chosenItem}`;
+  }
 }
 
 function nextTurn() {
-    document.getElementById("card-screen").classList.add("hidden");
+  document.getElementById("card-screen").classList.add("hidden");
+  currentTurn++;
+  if (currentTurn > numberOfPlayers) {
+    document.getElementById("end-screen").classList.remove("hidden");
+    return;
+  }
+  document.getElementById("turn-screen").classList.remove("hidden");
+  updateTurnTitle();
+}
 
-    currentTurn++;
-    if (currentTurn > numberOfPlayers) {
-        document.getElementById("end-screen").classList.remove("hidden");
-        return;
-    }
-
-    document.getElementById("turn-screen").classList.remove("hidden");
-    updateTurnTitle();
+function resetGame() {
+  document.getElementById("end-screen").classList.add("hidden");
+  document.getElementById("start-screen").classList.remove("hidden");
+  document.getElementById("playerCount").value = "";
 }
 </script>
 
