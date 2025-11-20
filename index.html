@@ -1,138 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>NBA Imposter Game</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        button {
-            padding: 12px 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 20px;
-            background-color: #1976d2;
-            color: white;
-        }
-
-        button:hover {
-            background-color: #145ea8;
-        }
-
-        #card {
-            background: #222;
-            padding: 30px;
-            border-radius: 10px;
-            font-size: 28px;
-            text-align: center;
-            width: 80%;
-            max-width: 400px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>NBA Imposter Game</title>
+<style>
+body { font-family: Arial, sans-serif; background: #111; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+.hidden { display: none; }
+button { padding: 12px 20px; font-size: 18px; border: none; border-radius: 6px; cursor: pointer; margin-top: 20px; background-color: #1976d2; color: white; }
+button:hover { background-color: #145ea8; }
+#card { background: #222; padding: 30px; border-radius: 10px; font-size: 28px; text-align: center; width: 80%; max-width: 400px; }
+select, input { padding: 10px; font-size: 18px; margin-top: 10px; }
+</style>
 </head>
 <body>
 
-    <div id="start-screen">
-        <h1>NBA Imposter Game</h1>
-        <label for="playerCount">How many people are playing?</label><br>
-        <input type="number" id="playerCount" min="3" max="20" style="padding:10px; font-size:18px; margin-top:10px;">
-        <button onclick="startGame()">Start Game</button>
-    </div>
+<div id="start-screen">
+    <h1>NBA Imposter Game</h1>
+    <label for="category">Choose a category:</label><br>
+    <select id="category">
+        <option value="players">NBA Players</option>
+        <option value="teams">NBA Teams</option>
+        <option value="both">Both</option>
+    </select><br>
 
-    <div id="turn-screen" class="hidden">
-        <h1 id="turnTitle"></h1>
-        <button onclick="showCard()">Reveal</button>
-    </div>
+    <label for="playerCount">How many people are playing?</label><br>
+    <input type="number" id="playerCount" min="3" max="20"><br>
 
-    <div id="card-screen" class="hidden">
-        <div id="card"></div>
-        <button onclick="nextTurn()">Next Player</button>
-    </div>
+    <button onclick="startGame()">Start Game</button>
+</div>
 
-    <div id="end-screen" class="hidden">
-        <h1>Everyone has seen their role!</h1>
-        <p>The game can begin — try to find the imposter!</p>
-    </div>
+<div id="turn-screen" class="hidden">
+    <h1 id="turnTitle"></h1>
+    <button onclick="showCard()">Reveal</button>
+</div>
 
-    <script>
-        let players = [];
-        let chosenPlayer = "";
-        let numberOfPlayers = 0;
-        let currentTurn = 1;
-        let imposterIndex = 0;
+<div id="card-screen" class="hidden">
+    <div id="card"></div>
+    <button onclick="nextTurn()">Next Player</button>
+</div>
 
-        async function startGame() {
-            numberOfPlayers = parseInt(document.getElementById("playerCount").value);
-            if (!numberOfPlayers || numberOfPlayers < 3) {
-                alert("Please enter at least 3 players.");
-                return;
-            }
+<div id="end-screen" class="hidden">
+    <h1>Everyone has seen their role!</h1>
+    <p>The game can begin — try to find the imposter!</p>
+</div>
 
-            // Load JSON file
-            const response = await fetch("players.json");
-            const data = await response.json();
+<script>
+let teams = [];
+let players = [];
+let chosenItem = "";
+let numberOfPlayers = 0;
+let currentTurn = 1;
+let imposterIndex = 0;
 
-            // Flatten to a single list of player names
-            players = Object.values(data).flat();
+async function startGame() {
+    numberOfPlayers = parseInt(document.getElementById("playerCount").value);
+    if (!numberOfPlayers || numberOfPlayers < 3) {
+        alert("Please enter at least 3 players.");
+        return;
+    }
 
-            // Pick a random NBA player
-            chosenPlayer = players[Math.floor(Math.random() * players.length)];
+    const category = document.getElementById("category").value;
 
-            // Choose the imposter (random player index)
-            imposterIndex = Math.floor(Math.random() * numberOfPlayers) + 1;
+    // Load JSON
+    const response = await fetch("players.json");
+    const data = await response.json();
 
-            // Switch screen
-            document.getElementById("start-screen").classList.add("hidden");
-            document.getElementById("turn-screen").classList.remove("hidden");
+    teams = data.teams;
+    players = data.players;
 
-            updateTurnTitle();
-        }
+    let pool = [];
+    if (category === "players") pool = players;
+    else if (category === "teams") pool = teams;
+    else pool = players.concat(teams);
 
-        function updateTurnTitle() {
-            document.getElementById("turnTitle").textContent = `Player ${currentTurn}, your turn`;
-        }
+    // Pick random item
+    chosenItem = pool[Math.floor(Math.random() * pool.length)];
 
-        function showCard() {
-            document.getElementById("turn-screen").classList.add("hidden");
-            document.getElementById("card-screen").classList.remove("hidden");
+    // Pick random imposter
+    imposterIndex = Math.floor(Math.random() * numberOfPlayers) + 1;
 
-            if (currentTurn === imposterIndex) {
-                document.getElementById("card").textContent = "❌ You are the IMPOSTER!";
-            } else {
-                document.getElementById("card").textContent = `✔️ The NBA player is:\n${chosenPlayer}`;
-            }
-        }
+    document.getElementById("start-screen").classList.add("hidden");
+    document.getElementById("turn-screen").classList.remove("hidden");
+    updateTurnTitle();
+}
 
-        function nextTurn() {
-            document.getElementById("card-screen").classList.add("hidden");
+function updateTurnTitle() {
+    document.getElementById("turnTitle").textContent = `Player ${currentTurn}, your turn`;
+}
 
-            currentTurn++;
+function showCard() {
+    document.getElementById("turn-screen").classList.add("hidden");
+    document.getElementById("card-screen").classList.remove("hidden");
 
-            if (currentTurn > numberOfPlayers) {
-                document.getElementById("end-screen").classList.remove("hidden");
-                return;
-            }
+    if (currentTurn === imposterIndex) {
+        document.getElementById("card").textContent = "❌ You are the IMPOSTER!";
+    } else {
+        document.getElementById("card").textContent = `✔️ The choice is:\n${chosenItem}`;
+    }
+}
 
-            document.getElementById("turn-screen").classList.remove("hidden");
-            updateTurnTitle();
-        }
-    </script>
+function nextTurn() {
+    document.getElementById("card-screen").classList.add("hidden");
+
+    currentTurn++;
+    if (currentTurn > numberOfPlayers) {
+        document.getElementById("end-screen").classList.remove("hidden");
+        return;
+    }
+
+    document.getElementById("turn-screen").classList.remove("hidden");
+    updateTurnTitle();
+}
+</script>
 
 </body>
 </html>
