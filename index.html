@@ -3,59 +3,117 @@
 <head>
 <meta charset="utf-8" />
 <title>NBA Imposter Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body { font-family: Arial, sans-serif; background: #111; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-  .hidden { display: none; }
-  button { padding: 12px 20px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; margin-top: 16px; background-color: #1976d2; color: white; }
-  button:hover { background-color: #145ea8; }
-  #card { background: #222; padding: 28px; border-radius: 12px; font-size: 22px; text-align: center; width: 100%; max-width: 520px; white-space: pre-wrap; }
-  select, input { padding: 10px; font-size: 16px; margin-top: 10px; border-radius: 6px; border: 1px solid #333; background: #0f0f0f; color: #fff; }
-  label { margin-top: 12px; display: block; }
-  h1 { margin: 0 0 12px 0; font-size: 28px; }
-  p { margin: 8px 0 0 0; color: #ddd; }
-  .small { font-size: 14px; color: #bbb; margin-top: 8px; }
+/* General reset */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Hidden helper */
+.hidden { display: none; }
+
+/* Buttons */
+button {
+  padding: 14px 24px;
+  font-size: 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 16px;
+  background-color: #1976d2;
+  color: white;
+  width: 90%;
+  max-width: 300px;
+}
+button:hover { background-color: #145ea8; }
+
+/* Card display */
+#card {
+  background: #222;
+  padding: 28px;
+  border-radius: 14px;
+  font-size: 5vw; /* scales with screen width */
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Inputs & selects */
+select, input {
+  padding: 12px;
+  font-size: 18px;
+  margin-top: 12px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #0f0f0f;
+  color: #fff;
+  width: 90%;
+  max-width: 300px;
+}
+
+/* Headings */
+h1 { margin-bottom: 12px; font-size: 6vw; text-align: center; }
+p { margin-top: 8px; color: #ccc; font-size: 14px; text-align: center; }
+
+/* Media query for larger screens */
+@media(min-width: 600px) {
+  #card { font-size: 24px; }
+  h1 { font-size: 28px; }
+  button { font-size: 18px; width: auto; padding: 12px 20px; }
+  select, input { font-size: 16px; width: auto; }
+}
 </style>
 </head>
 <body>
 
-  <div id="start-screen">
-    <h1>NBA Imposter Game</h1>
+<div id="start-screen">
+  <h1>NBA Imposter Game</h1>
 
-    <label for="category">Choose a category:</label>
-    <select id="category">
-      <option value="players">NBA Players</option>
-      <option value="teams">NBA Teams</option>
-      <option value="both">Both</option>
-    </select>
+  <label for="category">Choose a category:</label>
+  <select id="category">
+    <option value="players">NBA Players</option>
+    <option value="teams">NBA Teams</option>
+    <option value="both">Both</option>
+  </select>
 
-    <label for="playerCount">How many people are playing?</label>
-    <input type="number" id="playerCount" min="3" max="30" placeholder="Enter number of players">
+  <label for="playerCount">How many people are playing?</label>
+  <input type="number" id="playerCount" min="3" max="30" placeholder="Enter number of players">
 
-    <div>
-      <button onclick="startGame()">Start Game</button>
-    </div>
+  <button onclick="startGame()">Start Game</button>
+  <p class="small">Tip: pass the phone around — each person presses <em>Reveal</em> on their turn.</p>
+</div>
 
-    <p class="small">Tip: pass the phone around — each person presses <em>Reveal</em> on their turn so others can't see.</p>
-  </div>
+<div id="turn-screen" class="hidden">
+  <h1 id="turnTitle"></h1>
+  <button onclick="showCard()">Reveal</button>
+</div>
 
-  <div id="turn-screen" class="hidden">
-    <h1 id="turnTitle"></h1>
-    <button onclick="showCard()">Reveal</button>
-  </div>
+<div id="card-screen" class="hidden">
+  <div id="card"></div>
+  <button onclick="nextTurn()">Next Player</button>
+</div>
 
-  <div id="card-screen" class="hidden">
-    <div id="card"></div>
-    <button onclick="nextTurn()">Next Player</button>
-  </div>
-
-  <div id="end-screen" class="hidden">
-    <h1>Everyone has seen their role!</h1>
-    <p>The game can begin — try to find the imposter!</p>
-    <button onclick="resetGame()">Play Again</button>
-  </div>
+<div id="end-screen" class="hidden">
+  <h1>Everyone has seen their role!</h1>
+  <p>The game can begin — try to find the imposter!</p>
+  <button onclick="resetGame()">Play Again</button>
+</div>
 
 <script>
-// Embedded data (teams unchanged; players updated to be more current/pop-star heavy)
+// Data: Teams + current/popular players
 const data = {
   teams: [
     "Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets",
@@ -68,55 +126,17 @@ const data = {
     "Utah Jazz","Washington Wizards"
   ],
   players: [
-    "LeBron James",
-    "Giannis Antetokounmpo",
-    "Nikola Jokić",
-    "Luka Dončić",
-    "Jayson Tatum",
-    "Kevin Durant",
-    "Stephen Curry",
-    "Joel Embiid",
-    "Kawhi Leonard",
-    "Anthony Davis",
-    "Devin Booker",
-    "Trae Young",
-    "Ja Morant",
-    "Shai Gilgeous-Alexander",
-    "Anthony Edwards",
-    "Zion Williamson",
-    "Donovan Mitchell",
-    "Karl-Anthony Towns",
-    "Jimmy Butler",
-    "Paul George",
-    "Bam Adebayo",
-    "Damian Lillard",
-    "Kyrie Irving",
-    "Brandon Ingram",
-    "Pascal Siakam",
-    "Rudy Gobert",
-    "Victor Wembanyama",
-    "Jalen Brunson",
-    "Tyrese Haliburton",
-    "Lauri Markkanen",
-    "Julius Randle",
-    "De'Aaron Fox",
-    "Jaylen Brown",
-    "Kristaps Porziņģis",
-    "Chet Holmgren",
-    "LaMelo Ball",
-    "Darius Garland",
-    "Dejounte Murray",
-    "Zach LaVine",
-    "James Harden",
-    "Klay Thompson",
-    "Draymond Green",
-    "Mikal Bridges",
-    "Evan Mobley",
-    "Scottie Barnes",
-    "Paolo Banchero",
-    "Alperen Şengün",
-    "OG Anunoby",
-    "Tyrese Maxey"
+    "LeBron James","Giannis Antetokounmpo","Nikola Jokić","Luka Dončić",
+    "Jayson Tatum","Kevin Durant","Stephen Curry","Joel Embiid","Kawhi Leonard",
+    "Anthony Davis","Devin Booker","Trae Young","Ja Morant","Shai Gilgeous-Alexander",
+    "Anthony Edwards","Zion Williamson","Donovan Mitchell","Karl-Anthony Towns",
+    "Jimmy Butler","Paul George","Bam Adebayo","Damian Lillard","Kyrie Irving",
+    "Brandon Ingram","Pascal Siakam","Rudy Gobert","Victor Wembanyama","Jalen Brunson",
+    "Tyrese Haliburton","Lauri Markkanen","Julius Randle","De'Aaron Fox","Jaylen Brown",
+    "Kristaps Porziņģis","Chet Holmgren","LaMelo Ball","Darius Garland","Dejounte Murray",
+    "Zach LaVine","James Harden","Klay Thompson","Draymond Green","Mikal Bridges",
+    "Evan Mobley","Scottie Barnes","Paolo Banchero","Alperen Şengün",
+    "OG Anunoby","Tyrese Maxey"
   ]
 };
 
@@ -129,7 +149,6 @@ let currentTurn = 1;
 let imposterIndex = 0;
 
 function startGame() {
-  // reset in case of replay
   document.getElementById("end-screen").classList.add("hidden");
   document.getElementById("card-screen").classList.add("hidden");
 
@@ -145,12 +164,8 @@ function startGame() {
   else if (category === "teams") pool = teams.slice();
   else pool = players.concat(teams);
 
-  // pick random item for the round (same for all non-imposters)
   chosenItem = pool[Math.floor(Math.random() * pool.length)];
-
-  // pick random imposter index (1-based for readability)
   imposterIndex = Math.floor(Math.random() * numberOfPlayers) + 1;
-
   currentTurn = 1;
 
   document.getElementById("start-screen").classList.add("hidden");
