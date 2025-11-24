@@ -17,7 +17,7 @@
 
   .screen {
     display: none;          /* hide by default */
-    position: absolute;     /* overlay on top of each other */
+    position: fixed;     /* overlay on top of each other */
     top: 0;
     left: 0;
     width: 100%;
@@ -27,6 +27,8 @@
     justify-content: center;
     padding: 20px;
     box-sizing: border-box;
+    background-color: #0f0f0f; /* ensures background covers start screen */
+    z-index: 10;
   }
   
   .screen.active {
