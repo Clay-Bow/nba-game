@@ -177,7 +177,7 @@ function showScreen(id) {
 ----------------------------------------- */
 
 function startGame() {
-  const totalPlayers = parseInt(document.getElementById("playerCount").value);
+  totalPlayers = parseInt(document.getElementById("playerCount").value);
   const numImposters = parseInt(document.getElementById("imposterCount").value);
 
   if (!totalPlayers || totalPlayers < 3) {
