@@ -100,6 +100,8 @@
 <!-- END SCREEN -->
 <div id="end-screen" class="screen">
   <h1>All players have seen their cards!</h1>
+  <p>The game can begin — try to find the imposters!</p>
+  <button onclick="resetGame()">Play Again</button>
 </div>
 
 <script>
@@ -217,6 +219,12 @@ function nextPlayer() {
   } else {
     showTurnScreen();
   }
+}
+
+function resetGame() {
+  document.getElementById("playerCount").value = "";
+  document.getElementById("imposterCount").value = "1";
+  showScreen("start-screen");
 }
 
 </script>
