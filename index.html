@@ -28,34 +28,41 @@
     margin-bottom: 10px;
   }
 
+  /* Ensure labels, selects, and inputs are stacked */
   label {
     display: block;
     margin-top: 16px;
     font-size: 16px;
   }
-
+  
   select, input {
-    width: 100%;
-    max-width: 320px;
-    padding: 12px;
+    display: block;
     margin-top: 8px;
+    padding: 12px;
     font-size: 18px;
     border-radius: 8px;
     border: 1px solid #333;
     background: #1a1a1a;
     color: white;
+    width: 100%;       /* full width */
+    max-width: 320px;  /* consistent width */
+    box-sizing: border-box;
   }
-
+  
   button {
-    margin-top: 24px;
+    display: block;
+    margin-top: 20px;  /* ensure spacing above the button */
     padding: 14px 24px;
     font-size: 20px;
-    border: none;
     border-radius: 10px;
+    border: none;
     background: #007bff;
     color: white;
     cursor: pointer;
+    width: 100%;
+    max-width: 320px;  /* match inputs */
   }
+
 
   #card {
     font-size: 32px;
@@ -84,6 +91,7 @@
 
   <button onclick="startGame()">Start Game</button>
 </div>
+
 
 <!-- TURN SCREEN -->
 <div id="turn-screen" class="screen">
