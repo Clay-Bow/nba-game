@@ -1,180 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>NBA Imposter Game</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f0f0f;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+  }
 
-body {
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: #fff;
-  min-height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
-}
+  .screen {
+    display: none;
+  }
 
-/* Each screen fills viewport */
-.screen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none; /* hide by default */
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  text-align: center;
-}
+  .active {
+    display: block;
+  }
 
-.screen.active {
-  display: flex; /* show only active screen */
-}
+  h1 {
+    font-size: 26px;
+    margin-bottom: 10px;
+  }
 
-/* Labels and inputs */
-label { display: block; margin-top: 16px; font-size: 16px; }
-select, input {
-  display: block;
-  margin-top: 8px;
-  padding: 12px;
-  font-size: 18px;
-  border-radius: 8px;
-  border: 1px solid #333;
-  background: #0f0f0f;
-  color: #fff;
-  width: 100%;
-  max-width: 300px;
-}
+  label {
+    display: block;
+    margin-top: 16px;
+    font-size: 16px;
+  }
 
-/* Buttons */
-button {
-  padding: 14px 24px;
-  font-size: 20px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-top: 20px;
-  background-color: #1976d2;
-  color: white;
-  width: 90%;
-  max-width: 300px;
-}
-button:hover { background-color: #145ea8; }
+  select, input {
+    width: 100%;
+    max-width: 320px;
+    padding: 12px;
+    margin-top: 8px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1a1a1a;
+    color: white;
+  }
 
-/* Card */
-#card {
-  background: #222;
-  padding: 28px;
-  border-radius: 14px;
-  font-size: 5vw;
-  width: 90%;
-  max-width: 400px;
-  word-wrap: break-word;
-  text-align: center;
-}
+  button {
+    margin-top: 24px;
+    padding: 14px 24px;
+    font-size: 20px;
+    border: none;
+    border-radius: 10px;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+  }
 
-/* Headings */
-h1 { font-size: 6vw; margin-bottom: 16px; }
-p { color: #ccc; margin-top: 8px; font-size: 14px; }
-
-/* Media query for larger screens */
-@media(min-width: 600px) {
-  #card { font-size: 24px; }
-  h1 { font-size: 28px; }
-  button { font-size: 18px; width: auto; padding: 12px 20px; }
-  select, input { font-size: 16px; width: auto; }
-}
+  #card {
+    font-size: 32px;
+    margin-top: 40px;
+  }
 </style>
 </head>
 <body>
 
+<!-- START SCREEN -->
 <div id="start-screen" class="screen active">
   <h1>NBA Imposter Game</h1>
-  <label for="category">Choose a category:</label>
+
+  <label for="category">Select category:</label>
   <select id="category">
     <option value="players">NBA Players</option>
     <option value="teams">NBA Teams</option>
     <option value="both">Both</option>
   </select>
 
-  <label for="playerCount">How many people are playing?</label>
-  <input type="number" id="playerCount" min="3" max="30" placeholder="Enter number of players">
+  <label for="playerCount">How many players?</label>
+  <input type="number" id="playerCount" min="3" max="30" value="5">
+
+  <label for="imposterCount">How many imposters?</label>
+  <input type="number" id="imposterCount" min="1" value="1">
 
   <button onclick="startGame()">Start Game</button>
-  <p class="small">Tip: pass the phone around — each person presses <em>Reveal</em> on their turn.</p>
 </div>
 
+<!-- TURN SCREEN -->
 <div id="turn-screen" class="screen">
-  <h1 id="turnTitle"></h1>
-  <button onclick="showCard()">Reveal</button>
+  <h1 id="turn-label">Player Turn</h1>
+  <button onclick="showCard()">Show</button>
 </div>
 
+<!-- CARD SCREEN -->
 <div id="card-screen" class="screen">
   <div id="card"></div>
-  <button onclick="nextTurn()">Next Player</button>
+  <button onclick="nextPlayer()">Next</button>
 </div>
 
+<!-- END SCREEN -->
 <div id="end-screen" class="screen">
-  <h1>Everyone has seen their role!</h1>
-  <p>The game can begin — try to find the imposter!</p>
-  <button onclick="resetGame()">Play Again</button>
+  <h1>All players have seen their cards!</h1>
 </div>
 
 <script>
-const data = {
-  teams: ["Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets","Chicago Bulls","Cleveland Cavaliers","Dallas Mavericks","Denver Nuggets","Detroit Pistons","Golden State Warriors","Houston Rockets","Indiana Pacers","Los Angeles Clippers","Los Angeles Lakers","Memphis Grizzlies","Miami Heat","Milwaukee Bucks","Minnesota Timberwolves","New Orleans Pelicans","New York Knicks","Oklahoma City Thunder","Orlando Magic","Philadelphia 76ers","Phoenix Suns","Portland Trail Blazers","Sacramento Kings","San Antonio Spurs","Toronto Raptors","Utah Jazz","Washington Wizards"],
-  players: ["LeBron James","Giannis Antetokounmpo","Nikola Jokić","Luka Dončić","Jayson Tatum","Kevin Durant","Stephen Curry","Joel Embiid","Kawhi Leonard","Anthony Davis","Devin Booker","Trae Young","Ja Morant","Shai Gilgeous-Alexander","Anthony Edwards","Zion Williamson","Donovan Mitchell","Karl-Anthony Towns","Jimmy Butler","Paul George","Bam Adebayo","Damian Lillard","Kyrie Irving","Brandon Ingram","Pascal Siakam","Rudy Gobert","Victor Wembanyama","Jalen Brunson","Tyrese Haliburton","Lauri Markkanen","Julius Randle","De'Aaron Fox","Jaylen Brown","Kristaps Porziņģis","Chet Holmgren","LaMelo Ball","Darius Garland","Dejounte Murray","Zach LaVine","James Harden","Klay Thompson","Draymond Green","Mikal Bridges","Evan Mobley","Scottie Barnes","Paolo Banchero","Alperen Şengün","Malcolm Brogdon","OG Anunoby","Tyrese Maxey"]
-};
+/* -----------------------------------------
+   EMBEDDED NBA DATA (Players + Teams)
+----------------------------------------- */
+
+const teams = [
+  "Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets",
+  "Chicago Bulls","Cleveland Cavaliers","Dallas Mavericks","Denver Nuggets",
+  "Detroit Pistons","Golden State Warriors","Houston Rockets","Indiana Pacers",
+  "Los Angeles Clippers","Los Angeles Lakers","Memphis Grizzlies","Miami Heat",
+  "Milwaukee Bucks","Minnesota Timberwolves","New Orleans Pelicans","New York Knicks",
+  "Oklahoma City Thunder","Orlando Magic","Philadelphia 76ers","Phoenix Suns",
+  "Portland Trail Blazers","Sacramento Kings","San Antonio Spurs","Toronto Raptors",
+  "Utah Jazz","Washington Wizards"
+];
+
+// CURRENT + POPULAR PLAYERS (large mix)
+const players = [
+  "LeBron James","Stephen Curry","Kevin Durant","Giannis Antetokounmpo","Nikola Jokic",
+  "Luka Doncic","Joel Embiid","Jayson Tatum","Anthony Davis","Damian Lillard",
+  "Devin Booker","Ja Morant","Shai Gilgeous-Alexander","LaMelo Ball","Zion Williamson",
+  "Kyrie Irving","Kawhi Leonard","Paul George","James Harden","Jimmy Butler",
+  "Trae Young","Donovan Mitchell","Jaylen Brown","Julius Randle","Karl-Anthony Towns",
+  "Rudy Gobert","Draymond Green","Klay Thompson","Victor Wembanyama","Scoot Henderson",
+  "Chet Holmgren","Paolo Banchero","Jamal Murray","Michael Porter Jr.","Derik Queen",
+  "De'Aaron Fox","Domantas Sabonis","Brandon Ingram","CJ McCollum","Tyrese Haliburton",
+  "Bradley Beal","Kristaps Porzingis","Jaren Jackson Jr.","Mikal Bridges","VJ Edgecombe",
+  "OG Anunoby","Darius Garland","Evan Mobley","Tyler Herro","Chris Paul","Cooper Flagg",
+  "Tyrese Maxey","Bam Adebayo","DeMar DeRozan","Pascal Siakam","Jalen Brunson",
+  "Jalen Green","Anthony Edwards","Josh Hart","Lauri Markkanen","Stephon Castle",
+  "Alperen Sengun","Zach LaVine","Myles Turner","Austin Reaves","Derrick White"
+];
+
+/* -----------------------------------------
+   GAME VARIABLES
+----------------------------------------- */
 
 let chosenItem = "";
-let numberOfPlayers = 0;
-let currentTurn = 1;
-let imposterIndex = 0;
+let currentTurn = 0;
+let imposterIndexes = [];
+let totalPlayers = 0;
+
+/* -----------------------------------------
+   SCREEN MANAGEMENT
+----------------------------------------- */
 
 function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach(screen => screen.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
+/* -----------------------------------------
+   START GAME
+----------------------------------------- */
+
 function startGame() {
-  numberOfPlayers = parseInt(document.getElementById("playerCount").value, 10);
-  if (!numberOfPlayers || numberOfPlayers < 3) { alert("Please enter at least 3 players."); return; }
-
   const category = document.getElementById("category").value;
-  let pool = (category === "players") ? data.players.slice() : (category === "teams") ? data.teams.slice() : data.players.concat(data.teams);
+  totalPlayers = parseInt(document.getElementById("playerCount").value);
+  const numImposters = parseInt(document.getElementById("imposterCount").value);
 
-  chosenItem = pool[Math.floor(Math.random() * pool.length)];
-  imposterIndex = Math.floor(Math.random() * numberOfPlayers) + 1;
-  currentTurn = 1;
+  if (numImposters >= totalPlayers) {
+    alert("Imposters must be fewer than total players!");
+    return;
+  }
 
-  updateTurnTitle();
+  // Choose random item
+  if (category === "players") {
+    chosenItem = players[Math.floor(Math.random() * players.length)];
+  } else if (category === "teams") {
+    chosenItem = teams[Math.floor(Math.random() * teams.length)];
+  } else {
+    const pick = Math.random() < 0.5 ? players : teams;
+    chosenItem = pick[Math.floor(Math.random() * pick.length)];
+  }
+
+  // Select imposter positions (multiple)
+  imposterIndexes = [];
+  while (imposterIndexes.length < numImposters) {
+    const rand = Math.floor(Math.random() * totalPlayers);
+    if (!imposterIndexes.includes(rand)) imposterIndexes.push(rand);
+  }
+
+  currentTurn = 0;
+  showTurnScreen();
+}
+
+/* -----------------------------------------
+   TURN SCREEN
+----------------------------------------- */
+
+function showTurnScreen() {
+  document.getElementById("turn-label").textContent = `Player ${currentTurn + 1}, tap when ready`;
   showScreen("turn-screen");
 }
 
-function updateTurnTitle() { document.getElementById("turnTitle").textContent = `Player ${currentTurn}, your turn`; }
+/* -----------------------------------------
+   CARD SCREEN
+----------------------------------------- */
 
 function showCard() {
-  document.getElementById("card").textContent = 
-      (currentTurn === imposterIndex) ? "❌ You are the IMPOSTER!" : chosenItem;
+  const isImposter = imposterIndexes.includes(currentTurn);
+
+  document.getElementById("card").textContent =
+    isImposter ? "❌ You are an IMPOSTER!" : chosenItem;
+
   showScreen("card-screen");
 }
 
-function nextTurn() {
+function nextPlayer() {
   currentTurn++;
-  if (currentTurn > numberOfPlayers) { showScreen("end-screen"); return; }
-  updateTurnTitle();
-  showScreen("turn-screen");
+  if (currentTurn >= totalPlayers) {
+    showScreen("end-screen");
+  } else {
+    showTurnScreen();
+  }
 }
 
-function resetGame() {
-  document.getElementById("playerCount").value = "";
-  showScreen("start-screen");
-}
 </script>
-
 </body>
 </html>
