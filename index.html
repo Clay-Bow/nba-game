@@ -28,7 +28,15 @@
     margin-bottom: 10px;
   }
 
-  /* Ensure labels, selects, and inputs are stacked */
+  /* Center content on screen */
+  #start-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;   /* horizontal centering */
+    justify-content: center; /* vertical centering */
+    min-height: 100vh;
+  }
+  
   label {
     display: block;
     margin-top: 16px;
@@ -44,14 +52,14 @@
     border: 1px solid #333;
     background: #1a1a1a;
     color: white;
-    width: 100%;       /* full width */
-    max-width: 320px;  /* consistent width */
+    width: 100%;
+    max-width: 320px; /* all inputs same width */
     box-sizing: border-box;
   }
   
   button {
     display: block;
-    margin-top: 20px;  /* ensure spacing above the button */
+    margin-top: 20px;
     padding: 14px 24px;
     font-size: 20px;
     border-radius: 10px;
@@ -60,8 +68,9 @@
     color: white;
     cursor: pointer;
     width: 100%;
-    max-width: 320px;  /* match inputs */
+    max-width: 320px;
   }
+
 
 
   #card {
@@ -168,9 +177,20 @@ function showScreen(id) {
 ----------------------------------------- */
 
 function startGame() {
-  const category = document.getElementById("category").value;
-  totalPlayers = parseInt(document.getElementById("playerCount").value);
+  const totalPlayers = parseInt(document.getElementById("playerCount").value);
   const numImposters = parseInt(document.getElementById("imposterCount").value);
+
+  if (!totalPlayers || totalPlayers < 3) {
+    alert("Please enter a valid number of players (at least 3).");
+    return;
+  }
+
+  if (!numImposters || numImposters < 1 || numImposters >= totalPlayers) {
+    alert(`Please enter a valid number of imposters (1 to ${totalPlayers - 1}).`);
+    return;
+  }
+
+  const category = document.getElementById("category").value;
 
   if (numImposters >= totalPlayers) {
     alert("Imposters must be fewer than total players!");
