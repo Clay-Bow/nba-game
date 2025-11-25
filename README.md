@@ -86,5 +86,3 @@ You can run it in two ways:
    ```
    https://yourusername.github.io/your-repo-name/
    ```
-
-If you'd like, I can prettify this README with emojis, badges, screenshots, or a live demo link.
